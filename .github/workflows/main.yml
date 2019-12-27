@@ -2,7 +2,7 @@ name: CI
 
 on:
   schedule:
-    - cron: "10 5 * * *"
+    - cron: "10 19 * * *"
 
 jobs:
   build:
