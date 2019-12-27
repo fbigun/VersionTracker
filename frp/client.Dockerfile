@@ -2,6 +2,6 @@ FROM scratch
 
 LABEL maintainer='fbigun'
 
-COPY frp/frpc .
+COPY frpc .
 
 ENTRYPOINT ["./frpc"]

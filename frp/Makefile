@@ -30,10 +30,11 @@ request:
 $(tags):
 	curl -sSLO $(subst tag,$@,$(target))
 	tar xf $(subst tag,$@,frp_tag_linux_amd64.tar.gz)
-	mv -f $(subst tag,$@,frp_tag_linux_amd64) frp
-	chmod +x frp/frps
-	docker build -f server.Dockerfile -t fbigun/frps:$(patsubst %,v%,$@) .
+	tar_dir = $(subst tag,$@,frp_tag_linux_amd64)
+	chmod +x $(tar_dir)/frps
+	chmod +x $(tar_dir)/frpc
+	docker build -f server.Dockerfile -t fbigun/frps:$(patsubst %,v%,$@) $(tar_dir)/frps
 	docker push fbigun/frps:$(patsubst %,v%,$@)
-	docker build -f client.Dockerfile -t fbigun/frpc:$(patsubst %,v%,$@) .
+	docker build -f client.Dockerfile -t fbigun/frpc:$(patsubst %,v%,$@) $(tar_dir)/frpc
 	docker push fbigun/frpc:$(patsubst %,v%,$@)
 	rm -rf frp $(subst tag,$@,frp_tag_linux_amd64.tar.gz)
