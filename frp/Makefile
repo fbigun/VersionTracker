@@ -17,7 +17,7 @@ else
 	update_tags=$(filter-out $(imagehub_tags),$(github_tags))
 endif
 
-tags+=$(foreach tag,$(update_tags),$(patsubst v%,%,$(tag)))
+tags+=$(sort $(foreach tag,$(update_tags),$(patsubst v%,%,$(tag))))
 
 build:request $(tags)
 
