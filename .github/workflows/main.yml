@@ -16,6 +16,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWD }}
           login-server: https://index.docker.io/v1/
-      - name: build docker image
+      - name: build and push docker image
         run: |
-          docker built .
+          make -j8
