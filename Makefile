@@ -10,7 +10,7 @@ _all:
 compilable=$(patsubst %/Makefile,%,$(wildcard $(1)/Makefile))
 
 DIRS:=$(shell ls -l |grep "^d" |awk '{print $$9}')
-PROJECT:=$(foreach dir,$(DIRS),$(call compilable,$(dir)))
+PROJECT:=$(filter-out test,$(foreach dir,$(DIRS),$(call compilable,$(dir))))
 
 
 # All build process actions
