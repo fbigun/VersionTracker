@@ -24,7 +24,7 @@ github_result:='$(shell curl -sL $(github_url))'
 
 github_tags:=$(call filter_tag_json,$(github_result))
 ifeq ($(image_result),'"Resource not found"')
-	update_tags:=$(call filter_tag_json,$(github_tags))
+	update_tags:=$(github_tags)
 	failure:=yes
 else ifeq ($(image_result),'"The Repository is Locked, access denied"')
 	failure:=yes
