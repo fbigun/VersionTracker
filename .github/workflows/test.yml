@@ -1,0 +1,15 @@
+name: Test build docker image
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: clone source code
+        uses: actions/checkout@v1
+      - name: build and test docker image
+        run: |
+          export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+          cd test && make -j $(nproc)
