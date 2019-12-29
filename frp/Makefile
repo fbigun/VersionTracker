@@ -13,6 +13,9 @@ target:="https://github.com/fatedier/frp/releases/download/v@/frp_@_linux_amd64.
 # Define a function that filters out the tags of the json string
 filter_tag_json=$(shell echo -n $(1) | json_pp | grep name | awk -F '"' '{print $$4}')
 
+# Convert tags to tags in github package format
+convert_github_tag=$(patsubst $(1),docker.pkg.github.com/$(1)/versiontracker,$(1))
+
 # Get unupdated tags
 # Get the tag information on docker hub and GitHub respectively,
 # and get the tag tags that need to be updated by comparison.
@@ -31,6 +34,9 @@ else
 endif
 
 tags:=$(sort $(foreach tag,$(update_tags),$(patsubst v%,%,$(tag))))
+
+# Value obtained from the shell environment
+DOCKER_USERNAME:=$(DOCKER_USERNAME)
 
 # All build process actions
 
@@ -55,13 +61,19 @@ $(tags):
 	tar xf $(subst tag,$@,frp_tag_linux_amd64.tar.gz)
 	chmod +x $(subst tag,$@,frp_tag_linux_amd64)/frps
 	chmod +x $(subst tag,$@,frp_tag_linux_amd64)/frpc
-	docker build -f server.Dockerfile -t fbigun/frps:$(patsubst %,v%,$@) \
+	docker build -f server.Dockerfile -t $(DOCKER_USERNAME)/frps:$(patsubst %,v%,$@) \
 		$(subst tag,$@,frp_tag_linux_amd64)
-	docker push fbigun/frps:$(patsubst %,v%,$@)
-	docker build -f client.Dockerfile -t fbigun/frpc:$(patsubst %,v%,$@) \
+	docker build -f client.Dockerfile -t $(DOCKER_USERNAME)/frpc:$(patsubst %,v%,$@) \
 		$(subst tag,$@,frp_tag_linux_amd64)
-	docker push fbigun/frpc:$(patsubst %,v%,$@)
-	rm -rf frp $(subst tag,$@,frp_tag_linux_amd64.tar.gz)
+	docker tag $(DOCKER_USERNAME)/frps:$(patsubst %,v%,$@) \
+		$(call convert_github_tag,$(DOCKER_USERNAME))/frps:$(patsubst %,v%,$@)
+	docker tag $(DOCKER_USERNAME)/frpc:$(patsubst %,v%,$@) \
+		$(call convert_github_tag,$(DOCKER_USERNAME))/frpc:$(patsubst %,v%,$@)
+	docker push $(DOCKER_USERNAME)/frps:$(patsubst %,v%,$@)
+	docker push $(call convert_github_tag,$(DOCKER_USERNAME))/frps:$(patsubst %,v%,$@)
+	docker push $(DOCKER_USERNAME)/frpc:$(patsubst %,v%,$@)
+	docker push $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:$(patsubst %,v%,$@)
+	rm -rf $(wildcard frp_$@_*)
 
 PHONY += FORCE
 FORCE:
