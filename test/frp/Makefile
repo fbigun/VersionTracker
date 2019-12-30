@@ -48,7 +48,7 @@ $(objects):
 		$(call convert_github_tag,$(DOCKER_USERNAME))/frps:$(patsubst %,v%,$@)
 	docker tag $(DOCKER_USERNAME)/frpc:$(patsubst %,v%,$@) \
 		$(call convert_github_tag,$(DOCKER_USERNAME))/frpc:$(patsubst %,v%,$@)
-	rm -rf $(wildcard frp_$@_*)
+	rm -rvf frp_$@_linux_amd64*
 
 PHONY += FORCE
 FORCE:
