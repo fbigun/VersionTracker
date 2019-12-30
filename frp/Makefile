@@ -58,22 +58,20 @@ request:
 
 $(tags):
 	curl -sSLO $(subst @,$@,$(target))
-	tar xf $(subst tag,$@,frp_tag_linux_amd64.tar.gz)
-	chmod +x $(subst tag,$@,frp_tag_linux_amd64)/frps
-	chmod +x $(subst tag,$@,frp_tag_linux_amd64)/frpc
-	docker build -f server.Dockerfile -t $(DOCKER_USERNAME)/frps:$(patsubst %,v%,$@) \
-		$(subst tag,$@,frp_tag_linux_amd64)
-	docker build -f client.Dockerfile -t $(DOCKER_USERNAME)/frpc:$(patsubst %,v%,$@) \
-		$(subst tag,$@,frp_tag_linux_amd64)
-	docker tag $(DOCKER_USERNAME)/frps:$(patsubst %,v%,$@) \
-		$(call convert_github_tag,$(DOCKER_USERNAME))/frps:$(patsubst %,v%,$@)
-	docker tag $(DOCKER_USERNAME)/frpc:$(patsubst %,v%,$@) \
-		$(call convert_github_tag,$(DOCKER_USERNAME))/frpc:$(patsubst %,v%,$@)
-	docker push $(DOCKER_USERNAME)/frps:$(patsubst %,v%,$@)
-	docker push $(call convert_github_tag,$(DOCKER_USERNAME))/frps:$(patsubst %,v%,$@)
-	docker push $(DOCKER_USERNAME)/frpc:$(patsubst %,v%,$@)
-	docker push $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:$(patsubst %,v%,$@)
-	rm -rf $(wildcard frp_$@_*)
+	tar xf frp_$@_linux_amd64.tar.gz
+	chmod +x frp_$@_linux_amd64/frps
+	chmod +x frp_$@_linux_amd64/frpc
+	docker build -f server.Dockerfile -t $(DOCKER_USERNAME)/frps:v$@ frp_$@_linux_amd64
+	docker build -f client.Dockerfile -t $(DOCKER_USERNAME)/frpc:v$@ frp_$@_linux_amd64
+	docker tag $(DOCKER_USERNAME)/frps:v$@ \
+		$(call convert_github_tag,$(DOCKER_USERNAME))/frps:v$@
+	docker tag $(DOCKER_USERNAME)/frpc:v$@ \
+		$(call convert_github_tag,$(DOCKER_USERNAME))/frpc:v$@
+	docker push $(DOCKER_USERNAME)/frps:v$@
+	docker push $(call convert_github_tag,$(DOCKER_USERNAME))/frps:v$@
+	docker push $(DOCKER_USERNAME)/frpc:v$@
+	docker push $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:v$@
+	rm -rvf frp_$@_linux_amd64*
 
 PHONY += FORCE
 FORCE:
