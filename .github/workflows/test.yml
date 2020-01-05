@@ -1,6 +1,13 @@
 name: Test build docker image
 
-on: push
+on:
+  push:
+    paths-ignore:
+      - ".github/workflows/**"
+      - ".editorconfig"
+      - ".gitignore"
+      - "LICENSE"
+      - "README.md"
 
 jobs:
   build:
