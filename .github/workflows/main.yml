@@ -12,17 +12,11 @@ jobs:
       - name: clone source code
         uses: actions/checkout@v1
       - name: Dockerhub Login
-        uses: Azure/docker-login@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWD }}
-          login-server: https://index.docker.io/v1/
+        run: |
+          docker login -u '${{ secrets.DOCKER_USERNAME }}' -p '${{ secrets.DOCKER_PASSWD }}' https://index.docker.io/v1/
       - name: github Repo Login
-        uses: Azure/docker-login@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.GITHUB_PACKAGES_TOKEN }}
-          login-server: https://docker.pkg.github.com/
+        run: |
+          docker login -u '${{ secrets.DOCKER_USERNAME }}' -p '${{ secrets.GITHUB_PACKAGES_TOKEN }}' https://docker.pkg.github.com/
       - name: build and push docker image
         run: |
           export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
