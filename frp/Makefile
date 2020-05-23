@@ -10,6 +10,9 @@ github_url:="https://api.github.com/repos/fatedier/frp/tags"
 image_url:="https://registry.hub.docker.com/v1/repositories/fbigun/frps/tags"
 target:="https://github.com/fatedier/frp/releases/download/v@/frp_@_linux_amd64.tar.gz"
 
+# Value obtained from the shell environment
+DOCKER_USERNAME:=$(DOCKER_USERNAME)
+
 # Define a function that filters out the tags of the json string
 filter_tag_json=$(shell echo -n $(1) | json_pp | grep name | awk -F '"' '{print $$4}')
 
@@ -25,53 +28,67 @@ github_result:='$(shell curl -sL $(github_url))'
 github_tags:=$(call filter_tag_json,$(github_result))
 ifeq ($(image_result),'"Resource not found"')
 	update_tags:=$(github_tags)
-	failure:=yes
+	StatusMessage:="Build and upload image to Docker Repository for the first time"
+	StatusCode:="NoExit"
 else ifeq ($(image_result),'"The Repository is Locked, access denied"')
-	failure:=yes
+	StatusMessage:="The Docker Repository is Locked, access denied"
+	StatusCode:=1
 else
 	imagehub_tags:=$(call filter_tag_json,$(image_result))
 	update_tags=$(filter-out $(imagehub_tags),$(github_tags))
+	StatusMessage:="Build and upload image to Docker Repository"
+	StatusCode:="NoExit"
 endif
 
-tags:=$(sort $(foreach tag,$(update_tags),$(patsubst v%,%,$(tag))))
+tags:=$(sort $(update_tags))
+tags_offset:=$(tags) latest
+docker_tags:=$(addprefix frps_,$(tags_offset)) $(addprefix frpc_,$(tags_offset))
+docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_tags))
+docker_github_pkg_tags:=$(addprefix docker.pkg.github.com/$(DOCKER_USERNAME)/versiontracker/,$(docker_tags))
+all_docker_repo:=$(docker_hub_tags) $(docker_github_pkg_tags)
 
-# Value obtained from the shell environment
-DOCKER_USERNAME:=$(DOCKER_USERNAME)
+ifeq ($(words $(tags)), 0)
+	StatusMessage:="Project frp is not updated, no build job"
+	StatusCode:=0
+else
+	latest:=$(word $(words $(tags)),$(tags))
+endif
 
 # All build process actions
 
-PHONY += request $(tags)
+PHONY += BuildPre Build Upload test $(tags) latest _test $(all_docker_repo)
+Build:$(tags) latest
+Upload:$(all_docker_repo)
+_all:BuildPre Build Upload
+test:BuildPre Build _test
 
-_all:request $(tags)
 
-
-request:
-	@if [ -n "$(failure)" ] && [ -z "$(tags)" ]; then\
-		echo "The Docker Repository is Locked, access denied"; \
-		exit 1; \
-	elif [ -n "$(failure)" ] && [ -n "$(tags)" ]; then\
-		echo "Build and upload image to Docker Repository for the first time"; \
-	elif [ -z "$(tags)" ]; then\
-		echo "Project frp is not updated, no build job"; \
-		exit 0; \
-	fi
+BuildPre:
+	@echo $(StatusMessage)
+	@test $(StatusCode) != "NoExit" && exit $(StatusCode)
 
 $(tags):
 	curl -sSLO $(subst @,$@,$(target))
 	tar xf frp_$@_linux_amd64.tar.gz
 	chmod +x frp_$@_linux_amd64/frps
 	chmod +x frp_$@_linux_amd64/frpc
-	docker build -f server.Dockerfile -t $(DOCKER_USERNAME)/frps:v$@ frp_$@_linux_amd64
-	docker build -f client.Dockerfile -t $(DOCKER_USERNAME)/frpc:v$@ frp_$@_linux_amd64
-	docker tag $(DOCKER_USERNAME)/frps:v$@ \
-		$(call convert_github_tag,$(DOCKER_USERNAME))/frps:v$@
-	docker tag $(DOCKER_USERNAME)/frpc:v$@ \
-		$(call convert_github_tag,$(DOCKER_USERNAME))/frpc:v$@
-	docker push $(DOCKER_USERNAME)/frps:v$@
-	docker push $(call convert_github_tag,$(DOCKER_USERNAME))/frps:v$@
-	docker push $(DOCKER_USERNAME)/frpc:v$@
-	docker push $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:v$@
+	docker build --build-arg COMMAND_NAME=frps -t $(DOCKER_USERNAME)/frps:$@ frp_$@_linux_amd64
+	docker build --build-arg COMMAND_NAME=frpc -t $(DOCKER_USERNAME)/frpc:$@ frp_$@_linux_amd64
+	docker tag $(DOCKER_USERNAME)/frps:$@ $(call convert_github_tag,$(DOCKER_USERNAME))/frps:$@
+	docker tag $(DOCKER_USERNAME)/frpc:$@ $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:$@
 	rm -rvf frp_$@_linux_amd64*
+
+latest:
+	docker tag $(DOCKER_USERNAME)/frps:$(latest) $(DOCKER_USERNAME)/frps:latest
+	docker tag $(DOCKER_USERNAME)/frpc:$(latest) $(DOCKER_USERNAME)/frpc:latest
+	docker tag $(DOCKER_USERNAME)/frps:latest $(call convert_github_tag,$(DOCKER_USERNAME))/frps:latest
+	docker tag $(DOCKER_USERNAME)/frpc:latest $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:latest
+
+$(all_docker_repo):
+	docker push $(subst _,:,$@)
+
+_test:
+	@echo $(subst _,:,$(all_docker_repo))
 
 PHONY += FORCE
 FORCE:
