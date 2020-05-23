@@ -2,12 +2,9 @@ name: Test build docker image
 
 on:
   push:
-    paths-ignore:
-      - ".github/workflows/**"
-      - ".editorconfig"
-      - ".gitignore"
-      - "LICENSE"
-      - "README.md"
+    paths:
+      - "Dockerfile"
+      - "Makefile"
 
 jobs:
   build:
@@ -19,4 +16,4 @@ jobs:
       - name: build and test docker image
         run: |
           export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-          cd test && make -j $(nproc)
+          make -j $(nproc) test
