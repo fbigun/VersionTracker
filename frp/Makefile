@@ -8,7 +8,7 @@ _all:
 # API interface
 github_url:="https://api.github.com/repos/fatedier/frp/tags"
 image_url:="https://registry.hub.docker.com/v1/repositories/fbigun/frps/tags"
-target:="https://github.com/fatedier/frp/releases/download/v@/frp_@_linux_amd64.tar.gz"
+target:="https://github.com/fatedier/frp/releases/download/@/frp_@_linux_amd64.tar.gz"
 
 # Value obtained from the shell environment
 DOCKER_USERNAME:=$(DOCKER_USERNAME)
