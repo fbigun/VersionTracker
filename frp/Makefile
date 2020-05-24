@@ -8,7 +8,7 @@ _all:
 # API interface
 github_url:="https://api.github.com/repos/fatedier/frp/tags"
 image_url:="https://registry.hub.docker.com/v1/repositories/fbigun/frps/tags"
-target:="https://github.com/fatedier/frp/releases/download/@/frp_@_linux_amd64.tar.gz"
+target:="https://github.com/fatedier/frp/releases/download/v@/frp_@_linux_amd64.tar.gz"
 
 # Value obtained from the shell environment
 DOCKER_USERNAME:=$(DOCKER_USERNAME)
@@ -40,8 +40,8 @@ else
 	StatusCode:="NoExit"
 endif
 
-tags:=$(sort $(update_tags))
-tags_offset:=$(tags) latest
+tags:=$(sort $(patsubst v%,%,$(update_tags)))
+tags_offset:=$(patsubst %,v%,$(tags)) latest
 docker_tags:=$(addprefix frps_,$(tags_offset)) $(addprefix frpc_,$(tags_offset))
 docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_tags))
 docker_github_pkg_tags:=$(addprefix docker.pkg.github.com/$(DOCKER_USERNAME)/versiontracker/,$(docker_tags))
@@ -72,10 +72,10 @@ $(tags):
 	tar xf frp_$@_linux_amd64.tar.gz
 	chmod +x frp_$@_linux_amd64/frps
 	chmod +x frp_$@_linux_amd64/frpc
-	docker build --build-arg COMMAND_NAME=frps -t $(DOCKER_USERNAME)/frps:$@ frp_$@_linux_amd64
-	docker build --build-arg COMMAND_NAME=frpc -t $(DOCKER_USERNAME)/frpc:$@ frp_$@_linux_amd64
-	docker tag $(DOCKER_USERNAME)/frps:$@ $(call convert_github_tag,$(DOCKER_USERNAME))/frps:$@
-	docker tag $(DOCKER_USERNAME)/frpc:$@ $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:$@
+	docker build --build-arg COMMAND_NAME=frps -t $(DOCKER_USERNAME)/frps:v$@ frp_$@_linux_amd64
+	docker build --build-arg COMMAND_NAME=frpc -t $(DOCKER_USERNAME)/frpc:v$@ frp_$@_linux_amd64
+	docker tag $(DOCKER_USERNAME)/frps:v$@ $(call convert_github_tag,$(DOCKER_USERNAME))/frps:v$@
+	docker tag $(DOCKER_USERNAME)/frpc:v$@ $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:v$@
 	rm -rvf frp_$@_linux_amd64*
 
 latest:
