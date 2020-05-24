@@ -10,22 +10,22 @@ _all:
 compilable=$(patsubst %/Makefile,%,$(wildcard $(1)/Makefile))
 
 DIRS:=$(shell ls -l |grep "^d" |awk '{print $$9}')
-PROJECT:=$(filter-out test,$(foreach dir,$(DIRS),$(call compilable,$(dir))))
+PROJECT:=$(foreach dir,$(DIRS),$(call compilable,$(dir)))
 
-_PROJECT:=$(PROJECT)
+TEST_PROJECT:=$(addprefix test,$(PROJECT))
 
 
 # All build process actions
 
-PHONY += $(PROJECT) $(_PROJECT) test
+PHONY += $(PROJECT) $(TEST_PROJECT) test
 _all: $(PROJECT)
-test: $(_PROJECT)
+test: $(TEST_PROJECT)
 
 $(PROJECT):
 	$(MAKE) -C $@ M=$(shell pwd)
 
-$(_PROJECT):
-	$(MAKE) -C $@ M=$(shell pwd) -n test
+$(TEST_PROJECT):
+	$(MAKE) -C $(subst test,,$@) M=$(shell pwd) -n test
 
 PHONY += FORCE
 FORCE:
