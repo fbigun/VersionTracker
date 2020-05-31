@@ -25,7 +25,7 @@ $(PROJECT):
 	$(MAKE) -C $@ M=$(shell pwd)
 
 $(TEST_PROJECT):
-	$(MAKE) -C $(subst test,,$@) M=$(shell pwd) -n test
+	$(MAKE) -C $(subst test,,$@) M=$(shell pwd) test
 
 PHONY += FORCE
 FORCE:
