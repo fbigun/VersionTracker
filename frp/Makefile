@@ -72,6 +72,7 @@ $(tags):
 	tar xf frp_$@_linux_amd64.tar.gz
 	chmod +x frp_$@_linux_amd64/frps
 	chmod +x frp_$@_linux_amd64/frpc
+	cp Dockerfile frp_$@_linux_amd64/
 	docker build --build-arg COMMAND_NAME=frps -t $(DOCKER_USERNAME)/frps:v$@ frp_$@_linux_amd64
 	docker build --build-arg COMMAND_NAME=frpc -t $(DOCKER_USERNAME)/frpc:v$@ frp_$@_linux_amd64
 	docker tag $(DOCKER_USERNAME)/frps:v$@ $(call convert_github_tag,$(DOCKER_USERNAME))/frps:v$@
