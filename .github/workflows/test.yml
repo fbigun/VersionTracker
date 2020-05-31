@@ -3,8 +3,8 @@ name: Test build docker image
 on:
   push:
     paths:
-      - "Dockerfile"
-      - "Makefile"
+      - "**Dockerfile"
+      - "**Makefile"
 
 jobs:
   build:
