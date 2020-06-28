@@ -13,8 +13,7 @@ jobs:
         uses: actions/checkout@v1
       - name: Dockerhub Login
         run: |
-          docker login -u '${{ secrets.DOCKER_USERNAME }}' -p '${{ secrets.DOCKER_PASSWD }}' https://index.docker.io/v1/
-      - name: github Repo Login
+          echo '${{ secrets.DOCKER_PASSWD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin
         run: |
           docker login -u '${{ secrets.DOCKER_USERNAME }}' -p '${{ secrets.GITHUB_PACKAGES_TOKEN }}' https://docker.pkg.github.com/
       - name: build and push docker image
