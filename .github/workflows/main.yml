@@ -3,6 +3,13 @@ name: Generate and sync docker image
 on:
   schedule:
     - cron: "10 19 * * *"
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
 
 jobs:
   build:
