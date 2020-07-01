@@ -82,7 +82,7 @@ $(tags):BuildPre
 	docker tag $(DOCKER_USERNAME)/frpc:v$@ $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:v$@
 	rm -rvf frp_$@_linux_amd64*
 
-latest:$(tags)
+latest:$(tags) BuildPre
 	docker tag $(DOCKER_USERNAME)/frps:v$(latest) $(DOCKER_USERNAME)/frps:latest
 	docker tag $(DOCKER_USERNAME)/frpc:v$(latest) $(DOCKER_USERNAME)/frpc:latest
 	docker tag $(DOCKER_USERNAME)/frps:latest $(call convert_github_tag,$(DOCKER_USERNAME))/frps:latest
