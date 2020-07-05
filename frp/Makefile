@@ -44,7 +44,7 @@ else
 endif
 
 tags:=$(sort $(patsubst v%,%,$(update_tags)))
-tags_offset:=$(patsubst %,v%,$(tags)) latest
+tags_offset:=$(if $(tags),$(patsubst %,v%,$(tags)) latest)
 docker_tags:=$(addprefix frps_,$(tags_offset)) $(addprefix frpc_,$(tags_offset))
 docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_tags))
 docker_github_pkg_tags:=$(addprefix docker.pkg.github.com/$(DOCKER_USERNAME)/versiontracker/,$(docker_tags))
@@ -61,7 +61,7 @@ endif
 # All build process actions
 PHONY += BuildPre Build Upload test $(tags) $(latest) _test $(all_docker_repo) finish
 Build:$(tags) $(latest)
-Upload:$(all_docker_repo)
+Upload:$(all_docker_repo) Build
 _all:BuildPre Build Upload finish
 test:BuildPre Build _test
 
