@@ -59,8 +59,8 @@ else
 endif
 
 # All build process actions
-PHONY += BuildPre Build Upload test $(tags) latest _test $(all_docker_repo) finish
-Build:$(tags) latest
+PHONY += BuildPre Build Upload test $(tags) $(latest) _test $(all_docker_repo) finish
+Build:$(tags) $(latest)
 Upload:$(all_docker_repo)
 _all:BuildPre Build Upload finish
 test:BuildPre Build _test
@@ -82,7 +82,7 @@ $(tags):BuildPre
 	docker tag $(DOCKER_USERNAME)/frpc:v$@ $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:v$@
 	rm -rvf frp_$@_linux_amd64*
 
-latest:$(tags)
+$(latest):BuildPre $(tags)
 	docker tag $(DOCKER_USERNAME)/frps:v$(latest) $(DOCKER_USERNAME)/frps:latest
 	docker tag $(DOCKER_USERNAME)/frpc:v$(latest) $(DOCKER_USERNAME)/frpc:latest
 	docker tag $(DOCKER_USERNAME)/frps:latest $(call convert_github_tag,$(DOCKER_USERNAME))/frps:latest
