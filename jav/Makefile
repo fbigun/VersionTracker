@@ -12,26 +12,23 @@ github_url:="https://api.github.com/repos/yoshiko2/AV_Data_Capture/tags"
 dockerhub_url:="https://registry.hub.docker.com/v1/repositories/fbigun/jav/tags"
 
 github_tags:=$(shell curl $(github_url) | jq -r '.[].name')
+github_tags_latest:=$(word 1,$(github_tags))
 dockerhub_tags:=$(shell curl $(image_url) | jq -r '.[].name' || echo "")
-update_tags:=$(filter-out $(dockerhub_tags),$(github_tags))
-latest:=$(if $(update_tags),$(word $(words $(update_tags)),$(update_tags)))
+update_tags:=$(filter-out $(dockerhub_tags),$(github_tags_latest))
 
-docker_image_tags:=$(addprefix jav_v,$(update_tags))
-docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_image_tags)) latest
+docker_image_tags:=$(if $(update_tags),jav_v$(update_tags) jav_latest)
+docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_image_tags))
 
 
 # All build process actions
-PHONY += Build Upload $(tags) $(latest) $(docker_hub_tags) test
+PHONY += Build Upload $(update_tags) $(docker_hub_tags) test
 _all:Build Upload
 
-Build:$(tags) $(latest)
+Build:$(update_tags)
 
 $(update_tags):
 	docker build --build-arg AV_Data_Capture_VERSION=$@ -t $(DOCKER_USERNAME)/jav:v$@ .
-
-$(latest):$(update_tags)
-	docker tag $(DOCKER_USERNAME)/jav:v$(latest) $(DOCKER_USERNAME)/jav:latest
-	docker tag $(DOCKER_USERNAME)/jav:v$(latest) $(DOCKER_USERNAME)/jav:latest
+	docker tag $(DOCKER_USERNAME)/jav:v$@ $(DOCKER_USERNAME)/jav:latest
 
 Upload:$(docker_hub_tags)
 
