@@ -16,4 +16,4 @@ jobs:
       - name: build and test docker image
         run: |
           export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-          make -j $(nproc) test
+          make -j 1 test
