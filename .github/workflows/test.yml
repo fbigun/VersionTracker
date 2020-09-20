@@ -1,6 +1,6 @@
 name: Test build docker image
 
-on:push
+on: push
 
 jobs:
   build:
