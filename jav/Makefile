@@ -14,7 +14,7 @@ dockerhub_url:="https://registry.hub.docker.com/v1/repositories/fbigun/jav/tags"
 github_tags:=$(shell curl $(github_url) | jq -r '.[].name')
 github_tags_latest:=$(word 1,$(github_tags))
 dockerhub_tags:=$(shell curl $(image_url) | jq -r '.[].name' || echo "")
-update_tags:=$(filter-out $(dockerhub_tags),$(github_tags_latest))
+update_tags:=$(filter-out $(dockerhub_tags),v$(github_tags_latest))
 
 docker_image_tags:=$(if $(update_tags),jav_v$(update_tags) jav_latest)
 docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_image_tags))
