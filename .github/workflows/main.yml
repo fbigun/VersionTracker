@@ -6,6 +6,9 @@ on:
   push:
     branches:
       - master
+      paths:
+        - "**Dockerfile"
+        - "**Makefile"
   pull_request:
     branches:
       - master
