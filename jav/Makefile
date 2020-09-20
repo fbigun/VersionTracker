@@ -11,9 +11,9 @@ DOCKER_USERNAME:=$(DOCKER_USERNAME)
 github_url:="https://api.github.com/repos/yoshiko2/AV_Data_Capture/tags"
 dockerhub_url:="https://registry.hub.docker.com/v1/repositories/fbigun/jav/tags"
 
-github_tags:=$(shell curl $(github_url) | jq -r '.[].name')
+github_tags:=$(shell curl -sSL $(github_url) | jq -r '.[].name')
 github_tags_latest:=$(word 1,$(github_tags))
-dockerhub_tags:=$(shell curl $(image_url) | jq -r '.[].name' || echo "")
+dockerhub_tags:=$(shell curl -sSL $(image_url) | jq -r '.[].name' || echo "")
 update_tags:=$(filter-out $(dockerhub_tags),v$(github_tags_latest))
 
 docker_image_tags:=$(if $(update_tags),jav_v$(update_tags) jav_latest)
