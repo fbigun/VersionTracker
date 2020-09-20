@@ -13,64 +13,27 @@ target:="https://github.com/fatedier/frp/releases/download/v@/frp_@_linux_amd64.
 # Value obtained from the shell environment
 DOCKER_USERNAME:=$(DOCKER_USERNAME)
 
-# Define a function that filters out the tags of the json string
-filter_tag_json=$(shell echo -n $(1) | json_pp | grep name | awk -F '"' '{print $$4}')
-
-# Convert tags to tags in github package format
-convert_github_tag=$(patsubst $(1),docker.pkg.github.com/$(1)/versiontracker,$(1))
-
 # Get unupdated tags
 # Get the tag information on docker hub and GitHub respectively,
 # and get the tag tags that need to be updated by comparison.
-image_result:='$(shell curl -sL $(image_url))'
-github_result:='$(shell curl -sL $(github_url))'
+github_result:=$(shell curl -sSL $(github_url) | jq -r '.[].name')
+github_tags_latest:=$(word 1,$(github_tags))
+dockerhub_tags:=$(shell curl -sSL $(image_url) | jq -r '.[].name' || echo "")
+update_tags:=$(filter-out $(dockerhub_tags),$(github_tags_latest))
 
-github_tags:=$(call filter_tag_json,$(github_result))
-ifeq ($(image_result),'"Resource not found"')
-	update_tags:=$(github_tags)
-	StatusMessage:="Build and upload image to Docker Repository for the first time"
-	isExit:=false
-	errno:=0
-else ifeq ($(image_result),'"The Repository is Locked, access denied"')
-	StatusMessage:="The Docker Repository is Locked, access denied"
-	isExit:=true
-	errno:=1
-else
-	imagehub_tags:=$(call filter_tag_json,$(image_result))
-	update_tags:=$(filter-out $(imagehub_tags),$(github_tags))
-	StatusMessage:="Build and upload image to Docker Repository"
-	isExit:=false
-	errno:=0
-endif
-
-tags:=$(sort $(patsubst v%,%,$(update_tags)))
-tags_offset:=$(if $(tags),$(patsubst %,v%,$(tags)) latest)
-docker_tags:=$(addprefix frps_,$(tags_offset)) $(addprefix frpc_,$(tags_offset))
-docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_tags))
-docker_github_pkg_tags:=$(addprefix docker.pkg.github.com/$(DOCKER_USERNAME)/versiontracker/,$(docker_tags))
-all_docker_repo:=$(docker_hub_tags) $(docker_github_pkg_tags)
-
-ifeq ($(words $(tags)), 0)
-	StatusMessage:="Project frp is not updated, no build job"
-	isExit:=true
-	errno:=0
-else
-	latest:=$(word $(words $(tags)),$(tags))
-endif
+docker_image_tags:=$(if $(update_tags),frpc_$(update_tags) frpc_latest)
+docker_image_tags+=$(if $(update_tags),frps_$(update_tags) frps_latest)
+docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_image_tags))
 
 # All build process actions
-PHONY += BuildPre Build Upload test $(tags) $(latest) _test $(all_docker_repo) finish
-Build:$(tags) $(latest)
-Upload:$(all_docker_repo) Build
-_all:BuildPre Build Upload finish
-test:BuildPre Build _test
+PHONY += Build Upload test $(update_tags) $(docker_hub_tags)
+
+_all:Build Upload
 
 
-BuildPre:
-	@echo $(StatusMessage)
-	@test $(isExit) = true && exit $(errno) || true
+Build:$(update_tags)
 
-$(tags):BuildPre
+$(update_tags):
 	curl -sSLO $(subst @,$@,$(target))
 	tar xf frp_$@_linux_amd64.tar.gz
 	chmod +x frp_$@_linux_amd64/frps
@@ -78,25 +41,18 @@ $(tags):BuildPre
 	cp Dockerfile frp_$@_linux_amd64/
 	docker build --build-arg COMMAND_NAME=frps -t $(DOCKER_USERNAME)/frps:v$@ frp_$@_linux_amd64
 	docker build --build-arg COMMAND_NAME=frpc -t $(DOCKER_USERNAME)/frpc:v$@ frp_$@_linux_amd64
-	docker tag $(DOCKER_USERNAME)/frps:v$@ $(call convert_github_tag,$(DOCKER_USERNAME))/frps:v$@
-	docker tag $(DOCKER_USERNAME)/frpc:v$@ $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:v$@
+	docker tag $(DOCKER_USERNAME)/frps:v$@ $(DOCKER_USERNAME)/frps:latest
+	docker tag $(DOCKER_USERNAME)/frpc:v$@ $(DOCKER_USERNAME)/frpc:latest
 	rm -rvf frp_$@_linux_amd64*
 
-$(latest):BuildPre $(tags)
-	docker tag $(DOCKER_USERNAME)/frps:v$(latest) $(DOCKER_USERNAME)/frps:latest
-	docker tag $(DOCKER_USERNAME)/frpc:v$(latest) $(DOCKER_USERNAME)/frpc:latest
-	docker tag $(DOCKER_USERNAME)/frps:latest $(call convert_github_tag,$(DOCKER_USERNAME))/frps:latest
-	docker tag $(DOCKER_USERNAME)/frpc:latest $(call convert_github_tag,$(DOCKER_USERNAME))/frpc:latest
+Upload:$(docker_hub_tags)
 
-$(all_docker_repo):Build
+$(docker_hub_tags):Build
 	docker push $(subst _,:,$@)
 
-_test:Build
-	@echo $(subst _,:,$(all_docker_repo))
+test:Build
+	@echo $(subst _,:,$(docker_hub_tags))
 	@echo Test task completed
-
-finish:$(all_docker_repo)
-	@echo generate and sync docker image completed
 
 PHONY += FORCE
 FORCE:
