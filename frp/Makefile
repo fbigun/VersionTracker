@@ -51,7 +51,12 @@ $(docker_hub_tags):Build
 	docker push $(subst _,:,$@)
 
 test:Build
-	@echo $(subst _,:,$(docker_hub_tags))
+	@echo github_result:=$(github_result)
+	@echo github_tags_latest:=$(github_tags_latest)
+	@echo dockerhub_tags:=$(dockerhub_tags)
+	@echo update_tags:=$(update_tags)
+	@echo docker_image_tags:=$(docker_image_tags)
+	@echo docker_hub_tags:=$(docker_hub_tags)
 	@echo Test task completed
 
 PHONY += FORCE
