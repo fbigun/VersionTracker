@@ -16,7 +16,7 @@ github_tags_latest:=$(word 1,$(github_tags))
 dockerhub_tags:=$(shell curl -sSL $(dockerhub_url) | jq -r '.[].name' || echo "")
 update_tags:=$(filter-out $(dockerhub_tags),$(github_tags_latest))
 
-docker_image_tags:=$(if $(update_tags),jav_$(update_tags) jav_latest)
+docker_image_tags:=$(if $(update_tags),jav_v$(update_tags) jav_latest)
 docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_image_tags))
 
 
@@ -27,8 +27,8 @@ _all:Build Upload
 Build:$(update_tags)
 
 $(update_tags):
-	docker build --build-arg JAV_VERSION=$@ -t $(DOCKER_USERNAME)/jav:$@ .
-	docker tag $(DOCKER_USERNAME)/jav:$@ $(DOCKER_USERNAME)/jav:latest
+	docker build --build-arg JAV_VERSION=$@ -t $(DOCKER_USERNAME)/jav:v$@ .
+	docker tag $(DOCKER_USERNAME)/jav:v$@ $(DOCKER_USERNAME)/jav:latest
 
 Upload:$(docker_hub_tags)
 
