@@ -16,7 +16,7 @@ DOCKER_USERNAME:=$(DOCKER_USERNAME)
 # Get unupdated tags
 # Get the tag information on docker hub and GitHub respectively,
 # and get the tag tags that need to be updated by comparison.
-github_result:=$(shell curl -sSL $(github_url) | jq -r '.[].name')
+github_tags:=$(shell curl -sSL $(github_url) | jq -r '.[].name')
 github_tags_latest:=$(word 1,$(github_tags))
 dockerhub_tags:=$(shell curl -sSL $(image_url) | jq -r '.[].name' || echo "")
 update_tags:=$(filter-out $(dockerhub_tags),$(github_tags_latest))
