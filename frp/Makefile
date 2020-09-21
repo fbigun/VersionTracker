@@ -51,7 +51,7 @@ $(docker_hub_tags):Build
 	docker push $(subst _,:,$@)
 
 test:Build
-	@echo github_result:=$(github_result)
+	@echo github_tags:=$(github_tags)
 	@echo github_tags_latest:=$(github_tags_latest)
 	@echo dockerhub_tags:=$(dockerhub_tags)
 	@echo update_tags:=$(update_tags)
