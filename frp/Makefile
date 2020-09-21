@@ -19,10 +19,10 @@ DOCKER_USERNAME:=$(DOCKER_USERNAME)
 github_tags:=$(shell curl -sSL $(github_url) | jq -r '.[].name')
 github_tags_latest:=$(word 1,$(github_tags))
 dockerhub_tags:=$(shell curl -sSL $(image_url) | jq -r '.[].name' || echo "")
-update_tags:=$(filter-out $(dockerhub_tags),$(github_tags_latest))
+update_tags:=$(patsubst v%,%,$(filter-out $(dockerhub_tags),$(github_tags_latest)))
 
-docker_image_tags:=$(if $(update_tags),frpc_$(update_tags) frpc_latest)
-docker_image_tags+=$(if $(update_tags),frps_$(update_tags) frps_latest)
+docker_image_tags:=$(if $(update_tags),frpc_v$(update_tags) frpc_latest)
+docker_image_tags+=$(if $(update_tags),frps_v$(update_tags) frps_latest)
 docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_image_tags))
 
 # All build process actions
