@@ -26,11 +26,11 @@ docker_image_tags+=$(if $(update_tags),frps_v$(update_tags) frps_latest)
 docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_image_tags))
 
 # All build process actions
-PHONY += Build Upload test $(update_tags) $(docker_hub_tags)
+PHONY += Build Upload
 
 _all:Build Upload
 
-
+PHONY += $(update_tags)
 Build:$(update_tags)
 
 $(update_tags):
@@ -45,19 +45,24 @@ $(update_tags):
 	docker tag $(DOCKER_USERNAME)/frpc:v$@ $(DOCKER_USERNAME)/frpc:latest
 	rm -rvf frp_$@_linux_amd64*
 
+PHONY += $(docker_hub_tags)
 Upload:$(docker_hub_tags)
 
 $(docker_hub_tags):Build
 	docker push $(subst _,:,$@)
 
-test:Build
+PHONY += test debug
+test:debug Build
+	@echo Project 'frp' has been tested
+
+debug:
 	@echo github_tags:=$(github_tags)
 	@echo github_tags_latest:=$(github_tags_latest)
 	@echo dockerhub_tags:=$(dockerhub_tags)
 	@echo update_tags:=$(update_tags)
 	@echo docker_image_tags:=$(docker_image_tags)
 	@echo docker_hub_tags:=$(docker_hub_tags)
-	@echo Test task completed
+
 
 PHONY += FORCE
 FORCE:
