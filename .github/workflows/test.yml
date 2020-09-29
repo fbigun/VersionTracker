@@ -1,4 +1,4 @@
-name: Test build docker image
+name: test
 
 on:
   push:
@@ -16,6 +16,7 @@ on:
 
 jobs:
   build:
+    name: Test build docker image
     runs-on: ubuntu-18.04
 
     steps:
