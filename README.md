@@ -1,7 +1,7 @@
 # VersionTracker
 
-![build](https://github.com/fbigun/VersionTracker/workflows/Generate%20and%20sync%20docker%20image/badge.svg)
-![Test](https://github.com/fbigun/VersionTracker/workflows/Test%20build%20docker%20image/badge.svg)
+![build](https://github.com/fbigun/VersionTracker/workflows/build/badge.svg)
+![test](https://github.com/fbigun/VersionTracker/workflows/test/badge.svg)
 
 program verson tracking docker version
 
