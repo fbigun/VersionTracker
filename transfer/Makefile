@@ -36,7 +36,8 @@ Build:$(update_tags)
 
 $(update_tags):
 	curl -sSLO $(subst @,$@,$(target))
-	tar xf transfer_$@_linux_amd64.tar.gz
+	mkdir transfer_$@_linux_amd64
+	tar xf transfer_$@_linux_amd64.tar.gz -C transfer_$@_linux_amd64
 	chmod +x transfer_$@_linux_amd64/transfer
 	cp Dockerfile transfer_$@_linux_amd64/
 	docker build -t $(DOCKER_USERNAME)/transfer:v$@ transfer_$@_linux_amd64
