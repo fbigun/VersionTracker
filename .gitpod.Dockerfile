@@ -8,4 +8,6 @@ FROM gitpod/workspace-full
 RUN sudo apt-get update \
     && sudo apt-get install -y \
         ffmpeg \
+        gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto \
+        libssl-dev libev-dev libc-ares-dev automake libmbedtls-dev libsodium-dev \
     && sudo rm -rf /var/lib/apt/lists/*
