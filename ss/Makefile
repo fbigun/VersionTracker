@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MIT
+SHELL := /bin/bash
 
 
 # That's our default target when none is given on the command line
