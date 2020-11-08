@@ -39,8 +39,7 @@ PHONY += $(update_tags)
 Build:$(update_tags)
 
 $(update_tags):
-	curl -sSLO $(subst @,$@,$(target))
-	tar xf frp_$@_linux_amd64.tar.gz
+	curl -sSL $(subst @,$@,$(target)) | tar xz
 	chmod +x frp_$@_linux_amd64/frps
 	chmod +x frp_$@_linux_amd64/frpc
 	cp Dockerfile frp_$@_linux_amd64/
