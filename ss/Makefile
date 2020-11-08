@@ -53,10 +53,10 @@ $(update_tags):$(depend)
 	git clone https://github.com/shadowsocks/simple-obfs.git
 	cd simple-obfs && git submodule update --init --recursive \
 	&& ./autogen.sh && ./configure && make
-	mkdir ss-bin && cp $@/src/ss-{local,server} simple-obfs/src/obfs-{local,server} ss-bin/
-	docker build -t $(DOCKER_USERNAME)/ss:$@ ss-bin
+	mkdir -p ss-$@-bin && cp $@/src/ss-{local,server} simple-obfs/src/obfs-{local,server} ss-$@-bin/
+	docker build -t $(DOCKER_USERNAME)/ss:$@ -f Dockerfile ss-$@-bin
 	docker tag $(DOCKER_USERNAME)/ss:$@ $(DOCKER_USERNAME)/ss:latest
-	rm -rvf simple-obfs ss-bin $@
+	rm -rvf simple-obfs ss-$@-bin $@
 
 PHONY += $(docker_hub_tags)
 Upload:$(docker_hub_tags)
