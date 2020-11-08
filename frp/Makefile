@@ -9,6 +9,7 @@ _all:
 github_url:="https://api.github.com/repos/fatedier/frp/tags"
 image_url:="https://registry.hub.docker.com/v1/repositories/fbigun/frps/tags"
 target:="https://github.com/fatedier/frp/releases/download/v@/frp_@_linux_amd64.tar.gz"
+releases:="https://api.github.com/repos/fatedier/frp/releases"
 
 # Value obtained from the shell environment
 DOCKER_USERNAME:=$(DOCKER_USERNAME)
@@ -22,6 +23,8 @@ dockerhub_tags:=$(shell curl -sSL $(image_url) | jq -r '.[].name' || echo "")
 skip_update_tags:=
 nobuild_tags:=$(dockerhub_tags) $(skip_update_tags)
 update_tags:=$(patsubst v%,%,$(filter-out $(nobuild_tags),$(github_tags_latest)))
+ball:=$(shell curl -sSL $(releases)|jq -r '.[]|select(.tag_name=="v$(update_tags)")|.assets[]|select(.name|contains("linux"))|select(.name|contains("amd64"))|.browser_download_url?')
+update_tags:=$(if $(ball),$(update_tags))
 
 docker_image_tags:=$(if $(update_tags),frpc_v$(update_tags) frpc_latest)
 docker_image_tags+=$(if $(update_tags),frps_v$(update_tags) frps_latest)
@@ -64,6 +67,7 @@ debug:
 	@echo update_tags:=$(update_tags)
 	@echo docker_image_tags:=$(docker_image_tags)
 	@echo docker_hub_tags:=$(docker_hub_tags)
+	@echo ball:=$(ball)
 
 
 PHONY += FORCE
