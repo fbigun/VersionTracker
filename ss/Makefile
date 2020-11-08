@@ -22,6 +22,7 @@ dockerhub_tags:=$(shell curl -sSL $(image_url) | jq -r '.[].name' || echo "")
 skip_update_tags:=
 nobuild_tags:=$(dockerhub_tags) $(skip_update_tags)
 update_tags:=$(filter-out $(nobuild_tags),$(github_tags_latest))
+message:=$(if !$(update_tags), "print")
 
 docker_image_tags:=$(if $(update_tags),ss_$(update_tags) ss_latest)
 docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_image_tags))
@@ -32,8 +33,11 @@ PHONY += Build Upload
 
 _all:Build Upload
 
-PHONY += $(update_tags) $(depend)
-Build:$(update_tags)
+PHONY += $(update_tags) $(depend) $(message)
+Build:$(update_tags) $(message)
+
+$(message):
+	@echo info:: No updates to the ss project
 
 # Installation of basic build dependencies
 $(depend):

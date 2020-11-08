@@ -15,6 +15,7 @@ github_tags:=$(shell curl -sSL $(github_url) | jq -r '.[].name')
 github_tags_latest:=$(word 1,$(github_tags))
 dockerhub_tags:=$(shell curl -sSL $(dockerhub_url) | jq -r '.[].name' || echo "")
 update_tags:=$(if $(filter-out $(dockerhub_tags),v$(github_tags_latest)), $(github_tags_latest))
+message:=$(if !$(update_tags), "print")
 
 docker_image_tags:=$(if $(update_tags),jav_v$(github_tags_latest) jav_latest)
 docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_image_tags))
@@ -24,8 +25,11 @@ docker_hub_tags:=$(addprefix $(DOCKER_USERNAME)/,$(docker_image_tags))
 PHONY += Build Upload
 _all:Build Upload
 
-PHONY += $(update_tags)
-Build:$(update_tags)
+PHONY += $(update_tags) $(message)
+Build:$(update_tags) $(message)
+
+$(message):
+	@echo info:: No updates to the jav project
 
 $(update_tags):
 	docker build --build-arg JAV_VERSION=$@ -t $(DOCKER_USERNAME)/jav:v$@ .

@@ -25,6 +25,7 @@ nobuild_tags:=$(dockerhub_tags) $(skip_update_tags)
 update_tags:=$(patsubst v%,%,$(filter-out $(nobuild_tags),$(github_tags_latest)))
 ball:=$(shell curl -sSL $(releases)|jq -r '.[]|select(.tag_name=="v$(update_tags)")|.assets[]|select(.name|contains("linux"))|select(.name|contains("amd64"))|.browser_download_url?')
 update_tags:=$(if $(ball),$(update_tags))
+message:=$(if !$(update_tags), "print")
 
 docker_image_tags:=$(if $(update_tags),frpc_v$(update_tags) frpc_latest)
 docker_image_tags+=$(if $(update_tags),frps_v$(update_tags) frps_latest)
@@ -35,8 +36,11 @@ PHONY += Build Upload
 
 _all:Build Upload
 
-PHONY += $(update_tags)
-Build:$(update_tags)
+PHONY += $(update_tags) $(message)
+Build:$(update_tags) $(message)
+
+$(message):
+	@echo info:: No updates to the frp project
 
 $(update_tags):
 	curl -sSL $(subst @,$@,$(target)) | tar xz
