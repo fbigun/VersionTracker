@@ -13,7 +13,7 @@ dockerhub_url:="https://registry.hub.docker.com/v1/repositories/fbigun/jav/tags"
 
 github_tags:=$(shell curl -sSL $(github_url) | jq -r '.[].name')
 github_tags_latest:=$(word 1,$(github_tags))
-dockerhub_tags:=$(shell curl -sSL $(dockerhub_url) | jq -r '.[].name' || echo "")
+dockerhub_tags:=$(shell curl -sSL $(dockerhub_url) | jq -r '.[].name?' 2>/dev/null || echo "")
 update_tags:=$(if $(filter-out $(dockerhub_tags),v$(github_tags_latest)), $(github_tags_latest))
 message:=$(if !$(update_tags), "print")
 

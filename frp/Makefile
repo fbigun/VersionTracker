@@ -19,7 +19,7 @@ DOCKER_USERNAME:=$(DOCKER_USERNAME)
 # and get the tag tags that need to be updated by comparison.
 github_tags:=$(shell curl -sSL $(github_url) | jq -r '.[].name')
 github_tags_latest:=$(word 1,$(github_tags))
-dockerhub_tags:=$(shell curl -sSL $(image_url) | jq -r '.[].name' || echo "")
+dockerhub_tags:=$(shell curl -sSL $(image_url) | jq -r '.[].name?' 2>/dev/null || echo "")
 skip_update_tags:=
 nobuild_tags:=$(dockerhub_tags) $(skip_update_tags)
 update_tags:=$(patsubst v%,%,$(filter-out $(nobuild_tags),$(github_tags_latest)))
