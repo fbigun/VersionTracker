@@ -1,5 +1,8 @@
 # AV Data Capture (CLI)
 
+![Docker Image Version (latest semver)](https://img.shields.io/docker/v/fbigun/jav)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/yoshiko2/AV_Data_Capture)
+
 > 日本电影元数据 抓取工具 | 刮削器，配合本地影片管理软件 Emby, Jellyfin, Kodi 等管理本地影片，该软件起到分类与元数据（metadata）抓取作用，利用元数据信息来分类，仅供本地影片分类整理使用。
 
 [项目地址](https://github.com/yoshiko2/AV_Data_Capture)
